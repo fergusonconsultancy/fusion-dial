@@ -9,11 +9,11 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name">
 
-        <!-- Tapping the app icon jumps straight to the "set wallpaper" screen. -->
+        <!-- Tapping the app icon asks which wallpaper to set. -->
         <activity
             android:name=".SetWallpaperActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -31,6 +31,32 @@
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/wallpaper" />
+        </service>
+
+        <service
+            android:name=".CasebackWallpaperService"
+            android:exported="true"
+            android:label="@string/caseback_name"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/caseback" />
+        </service>
+
+        <service
+            android:name=".FlipWallpaperService"
+            android:exported="true"
+            android:label="@string/flip_name"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/flip" />
         </service>
     </application>
 </manifest>

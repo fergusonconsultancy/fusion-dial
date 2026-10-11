@@ -1,0 +1,34 @@
+<!doctype html><meta charset="utf-8"><title>Caseback shader preview</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style><canvas id="c"></canvas>
+<script>
+// Desktop preview of the caseback shader. Serve the repo root and open tools/preview_caseback.html
+(async()=>{
+const q=new URLSearchParams(location.search);
+const W=+(q.get('w')||1080),H=+(q.get('h')||2520);
+const c=document.getElementById('c');c.width=W;c.height=H;
+const gl=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false});
+const fs=await (await fetch('../app/src/main/res/raw/caseback.frag')).text();
+function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){document.title='ERR '+gl.getShaderInfoLog(o);throw gl.getShaderInfoLog(o)}return o}
+const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);gl.useProgram(pr);
+gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const a=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+const img=new Image();img.src='../app/src/main/res/drawable-nodpi/caseback_overlay.png';await img.decode();
+gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+const U=n=>gl.getUniformLocation(pr,n);
+const fixed=q.get('t')!==null;
+function draw(){
+  const t=fixed?+q.get('t'):performance.now()/1000;
+  const tall=H>W*1.5,R=Math.min(0.47*W,0.38*H)/1.30;
+  gl.viewport(0,0,W,H);gl.uniform2f(U('uRes'),W,H);gl.uniform2f(U('uCenter'),W*0.5,H*(tall?0.60:0.54));gl.uniform1f(U('uR0'),R);
+  gl.uniform1f(U('uBal'),4.7*Math.sin(2*Math.PI*3*t));
+  const rotor=q.get('rotor')!==null?+q.get('rotor'):Math.PI+1.2*Math.sin(t*0.7);
+  gl.uniform1f(U('uRotor'),rotor);gl.uniform1f(U('uWind'),rotor*0.25);
+  gl.uniform1f(U('uLight'),q.get('light')!==null?+q.get('light'):-0.9+0.5*Math.sin(t*0.4));
+  gl.uniform1i(U('uOv'),0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  if(!fixed)requestAnimationFrame(draw);else document.title='READY';
+}
+draw();
+})();
+</script>

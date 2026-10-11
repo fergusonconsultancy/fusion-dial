@@ -2,4 +2,9 @@
 <resources>
     <string name="app_name">Fusion Dial</string>
     <string name="description">A working guilloché dial with a sweeping small seconds.</string>
+    <string name="caseback_name">Caseback</string>
+    <string name="caseback_description">An automatic movement with a beating balance and a rotor that swings as you tilt the phone.</string>
+    <string name="flip_name">Dial and Caseback</string>
+    <string name="flip_description">For folding phones: the dial when closed, the caseback when open.</string>
+    <string name="choose">Choose a wallpaper</string>
 </resources>
