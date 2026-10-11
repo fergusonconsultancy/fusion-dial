@@ -7,7 +7,7 @@ const q=new URLSearchParams(location.search);
 const W=+(q.get('w')||1080),H=+(q.get('h')||2520);
 const c=document.getElementById('c');c.width=W;c.height=H;
 const gl=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false});
-// ?scene=petrol or ?scene=scales previews a Rotation dial; no scene previews the Fusion Dial
+// ?scene=petrol|scales|neo|diver2|diver3|chrono previews a Rotation dial; no scene previews the Fusion Dial
 const scene=q.get('scene');
 const raw='../app/src/main/res/raw/';
 const fs=scene?(await (await fetch(raw+'dial_common.glsl')).text())+'\n'+(await (await fetch(raw+'dial_'+scene+'.frag')).text()):await (await fetch(raw+'dial.frag')).text();
@@ -20,14 +20,19 @@ gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_PREMUL
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
 const U=n=>gl.getUniformLocation(pr,n);
+if(scene){const im2=new Image();im2.src='../app/src/main/res/drawable-nodpi/dates.png';await im2.decode();
+ gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+ gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,im2);gl.generateMipmap(gl.TEXTURE_2D);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.activeTexture(gl.TEXTURE0);}
+const SCALE={petrol:0.87,scales:0.87,neo:0.92,diver2:0.74,diver3:0.76,chrono:0.72};
 function draw(){
-  const tall=H>W*1.5,R0=Math.min(0.421*W,0.337*H)*(scene?0.87:1);
+  const tall=H>W*1.5,R0=Math.min(0.421*W,0.337*H)*(scene?SCALE[scene]:1);
   let ms;if(q.get('time')){const[h,m,s]=q.get('time').split(':').map(Number);ms=((h*60+m)*60+s)*1000}else{const d=new Date();ms=((d.getHours()*60+d.getMinutes())*60+d.getSeconds())*1000+d.getMilliseconds()}
   const TAU=Math.PI*2,beat=Math.floor(ms/(1000/6))*(1000/6);
   gl.viewport(0,0,W,H);gl.uniform2f(U('uRes'),W,H);gl.uniform2f(U('uCenter'),W*0.5,H*(tall?0.60:0.54));gl.uniform1f(U('uR0'),R0);
   gl.uniform1f(U('uLoop'),q.get('loop')?+q.get('loop'):(performance.now()%10000)/10000);
   gl.uniform1f(U('uHour'),(ms%43200000)/43200000*TAU);gl.uniform1f(U('uMin'),(ms%3600000)/3600000*TAU);gl.uniform1f(U('uSec'),(beat%60000)/60000*TAU);
-  gl.uniform1i(U('uOv'),0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  gl.uniform1i(U('uOv'),0);gl.uniform1i(U('uAux'),1);gl.uniform1f(U('uDate'),+(q.get('date')||new Date().getDate()));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   if(!q.get('time'))requestAnimationFrame(draw);else document.title='READY';
 }
 draw();

@@ -25,7 +25,8 @@ public class DialRenderer implements SceneRenderer {
     private int program;
     private int texture;
     private int width = 1, height = 1;
-    private int uRes, uCenter, uR0, uLoop, uHour, uMin, uSec, uOv;
+    private int uRes, uCenter, uR0, uLoop, uHour, uMin, uSec, uOv, uDate, uAux;
+    private int auxTexture;
     private long lastFrame;
 
     private final int[] shaderParts;
@@ -65,7 +66,11 @@ public class DialRenderer implements SceneRenderer {
         uMin = GLES20.glGetUniformLocation(program, "uMin");
         uSec = GLES20.glGetUniformLocation(program, "uSec");
         uOv = GLES20.glGetUniformLocation(program, "uOv");
+        uDate = GLES20.glGetUniformLocation(program, "uDate");
+        uAux = GLES20.glGetUniformLocation(program, "uAux");
         texture = GlUtil.loadTexture(context, overlayId);
+        // Only dials with a date window ask for the date-number atlas.
+        auxTexture = uAux >= 0 ? GlUtil.loadTexture(context, R.drawable.dates) : 0;
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_BLEND);
     }
@@ -119,6 +124,15 @@ public class DialRenderer implements SceneRenderer {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
         GLES20.glUniform1i(uOv, 0);
+        if (uAux >= 0) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, auxTexture);
+            GLES20.glUniform1i(uAux, 1);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        }
+        if (uDate >= 0) {
+            GLES20.glUniform1f(uDate, java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH));
+        }
         GlUtil.drawQuad(program, quad);
     }
 }

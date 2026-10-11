@@ -97,3 +97,59 @@ vec3 backdrop(float r, float R0, float th, float phi, vec3 tint) {
     float sb = pow(abs(cos(th + phi - 0.9)), 10.0);
     return tint * (0.03 + 0.16 * sb) * vig;
 }
+
+// ---------------------------------------------------------------------------
+// Extra parts for the later dials.
+uniform float uDate;      // day of the month, 1..31
+uniform sampler2D uAux;   // date-number atlas, eight numbers to a row
+
+float aaStep(float m) { return smoothstep(-0.8, 0.8, m); }
+
+// A point in a hand's own frame: x runs along the hand, y across it.
+vec2 handAxes(vec2 p, float ang) {
+    vec2 d = vec2(sin(ang), -cos(ang));
+    return vec2(dot(p, d), dot(p, vec2(-d.y, d.x)));
+}
+// "Margin" functions: how many pixels a point sits inside a shape (negative = outside).
+// Shrinking a shape for its lume is then just subtracting from the margin.
+float seg(vec2 aq, float a0, float a1, float h) { return min(h - abs(aq.y), min(aq.x - a0, a1 - aq.x)); }
+float swordMargin(vec2 aq, float len, float w, float tail) {
+    float h = w * (1.0 - 0.85 * smoothstep(len - 3.0 * w, len, aq.x));
+    return seg(aq, -tail, len, h);
+}
+float snowflakeMargin(vec2 aq, float len, float w, float tail) {
+    float m = seg(aq, -tail, 0.70 * len, w);
+    float d = 0.215 * len;
+    m = max(m, (d - (abs(aq.x - 0.74 * len) + abs(aq.y))) * 0.7071);
+    return max(m, seg(aq, 0.74 * len, len, w * 0.8));
+}
+float arrowMargin(vec2 aq, float len, float w, float tail) {
+    float m = seg(aq, -tail, 0.56 * len, w);
+    float a0 = 0.48 * len;
+    float hw = 0.215 * len * (1.0 - (aq.x - a0) / (len - a0));
+    return max(m, min(hw - abs(aq.y), aq.x - a0) * 0.85);
+}
+float pointerMargin(vec2 aq, float len, float w, float tail) {
+    float h = aq.x > 0.0 ? mix(w, w * 0.16, clamp(aq.x / len, 0.0, 1.0)) : w * 1.12;
+    return seg(aq, -tail, len, h);
+}
+
+// Lays one hand over the picture: shadow, metal body, then lume set in by lumeInset pixels.
+vec3 layHand(vec3 col, float m, float mShadow, vec3 metal, vec3 lume, float lumeInset, float lumeGate) {
+    col *= 1.0 - 0.50 * aaStep(mShadow);
+    col = mix(col, metal, aaStep(m));
+    return mix(col, lume, aaStep(m - lumeInset) * lumeGate);
+}
+vec3 steelHand(vec2 aq, float ang, float phi) { return polished(aq.y < 0.0 ? -1.0 : 1.0, ang, phi); }
+
+vec3 gold(float v) { return ramp(v, vec3(40., 26., 6.), vec3(128., 92., 30.), vec3(206., 162., 72.), vec3(246., 214., 130.), vec3(255., 244., 206.)); }
+vec3 goldHand(vec2 aq, float ang, float phi) {
+    float g = 0.5 + 0.5 * (aq.y < 0.0 ? -1.0 : 1.0) * cos(ang - 2.0 * phi - 0.6);
+    return gold(0.42 + 0.48 * g);
+}
+
+// Knurled grip ring round a rotating bezel.
+vec3 coinEdge(float th, float phi, float teeth) {
+    float t = 0.5 + 0.5 * cos(th * teeth);
+    return silver(0.20 + 0.55 * t * (0.35 + 0.65 * pow(abs(cos(th - phi - 0.9)), 2.0)));
+}

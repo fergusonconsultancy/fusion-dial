@@ -24,6 +24,10 @@ public class RotationRenderer implements SceneRenderer {
         dials = new DialRenderer[]{
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_petrol}, R.drawable.overlay_petrol, 0.87f),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_scales}, R.drawable.overlay_scales, 0.87f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_neo}, R.drawable.overlay_neo, 0.92f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver2}, R.drawable.overlay_diver2, 0.74f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver3}, R.drawable.overlay_diver3, 0.76f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_chrono}, R.drawable.overlay_chrono, 0.72f),
         };
         ready = new boolean[dials.length];
     }

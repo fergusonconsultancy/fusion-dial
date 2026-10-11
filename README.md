@@ -14,7 +14,7 @@ Three Android live wallpapers in one app.
 
 **Dial and Caseback**: for folding phones. Dial when closed, caseback when open.
 
-**Rotation**: a different dial from the collection each day, changing at midnight, each with working hands. Two dials so far: a petrol sunburst sports dial and a scale-guilloché dial.
+**Rotation**: a different dial from the collection each day, changing at midnight, each with working hands. Six dials so far: petrol sunburst sports dial, scale guilloché, black single-hand with a live date, dual-scale diver, taupe diver with snowflake hands, and a gold cushion chronograph.
 
 Drawing and sensing stop whenever the wallpaper is hidden.
 
@@ -38,6 +38,6 @@ Every push to `main` builds a fresh APK and publishes it as a new release.
 | `tools/overlay.py` | Regenerates the numerals, batons and fret ring texture. |
 | `app/src/main/res/raw/dial_common.glsl` + `dial_*.frag` | The Rotation dials: shared hands and metals, then one file per watch. |
 | `app/src/main/java/.../RotationRenderer.java` | Picks today's dial. The list at the top is the rotation order. |
-| `tools/overlay_rotation.py` | Regenerates the Rotation dials' numerals, tracks and markers. |
+| `tools/overlay_rotation.py`, `tools/overlay_rotation2.py` | Regenerate the Rotation dials' numerals, tracks and markers. |
 | `tools/caseback_overlay.py` | Regenerates the caseback engraving texture. |
 | `tools/preview.html`, `tools/preview_caseback.html` | Run the same shaders in a desktop browser. |
