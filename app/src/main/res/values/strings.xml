@@ -6,5 +6,7 @@
     <string name="caseback_description">An automatic movement with a beating balance and a rotor that swings as you tilt the phone.</string>
     <string name="flip_name">Dial and Caseback</string>
     <string name="flip_description">For folding phones: the dial when closed, the caseback when open.</string>
+    <string name="rotation_name">Rotation</string>
+    <string name="rotation_description">A different dial from the collection each day, each telling the time.</string>
     <string name="choose">Choose a wallpaper</string>
 </resources>

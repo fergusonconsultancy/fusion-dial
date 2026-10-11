@@ -10,7 +10,7 @@ import java.util.TimeZone;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/** Draws the dial. All the artwork lives in res/raw/dial.frag; this class feeds it the time. */
+/** Draws a dial. All the artwork lives in a shader under res/raw; this class feeds it the time. */
 public class DialRenderer implements SceneRenderer {
 
     /** Frames per second. 60 is smooth; 30 roughly halves the GPU work. */
@@ -28,8 +28,24 @@ public class DialRenderer implements SceneRenderer {
     private int uRes, uCenter, uR0, uLoop, uHour, uMin, uSec, uOv;
     private long lastFrame;
 
+    private final int[] shaderParts;
+    private final int overlayId;
+    private final float radiusScale;
+
+    /** The Fusion Dial. */
     public DialRenderer(Context context) {
+        this(context, new int[]{R.raw.dial}, R.drawable.overlay, 1f);
+    }
+
+    /**
+     * Any dial. shaderParts are raw shader files joined in order, overlayId is the dial's
+     * static furniture, and radiusScale shrinks the dial to leave room for a bezel.
+     */
+    public DialRenderer(Context context, int[] shaderParts, int overlayId, float radiusScale) {
         this.context = context.getApplicationContext();
+        this.shaderParts = shaderParts;
+        this.overlayId = overlayId;
+        this.radiusScale = radiusScale;
     }
 
     @Override
@@ -38,7 +54,9 @@ public class DialRenderer implements SceneRenderer {
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        program = GlUtil.buildProgram(GlUtil.readRaw(context, R.raw.dial));
+        StringBuilder src = new StringBuilder();
+        for (int part : shaderParts) src.append(GlUtil.readRaw(context, part)).append('\n');
+        program = GlUtil.buildProgram(src.toString());
         uRes = GLES20.glGetUniformLocation(program, "uRes");
         uCenter = GLES20.glGetUniformLocation(program, "uCenter");
         uR0 = GLES20.glGetUniformLocation(program, "uR0");
@@ -47,7 +65,7 @@ public class DialRenderer implements SceneRenderer {
         uMin = GLES20.glGetUniformLocation(program, "uMin");
         uSec = GLES20.glGetUniformLocation(program, "uSec");
         uOv = GLES20.glGetUniformLocation(program, "uOv");
-        texture = GlUtil.loadTexture(context, R.drawable.overlay);
+        texture = GlUtil.loadTexture(context, overlayId);
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDisable(GLES20.GL_BLEND);
     }
@@ -81,7 +99,7 @@ public class DialRenderer implements SceneRenderer {
 
         // Tall cover screen: dial sits lower, clear of the clock. Unfolded: nearer the middle.
         boolean tall = height > width * 1.5f;
-        float r0 = Math.min(0.421f * width, 0.337f * height);
+        float r0 = Math.min(0.421f * width, 0.337f * height) * radiusScale;
         float cx = width * 0.5f;
         float cy = height * (tall ? 0.60f : 0.54f);
 

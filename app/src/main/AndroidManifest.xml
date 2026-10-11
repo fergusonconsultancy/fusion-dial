@@ -58,5 +58,18 @@
                 android:name="android.service.wallpaper"
                 android:resource="@xml/flip" />
         </service>
+
+        <service
+            android:name=".RotationWallpaperService"
+            android:exported="true"
+            android:label="@string/rotation_name"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/rotation" />
+        </service>
     </application>
 </manifest>

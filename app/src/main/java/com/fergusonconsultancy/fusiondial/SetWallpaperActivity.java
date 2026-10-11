@@ -15,6 +15,7 @@ public class SetWallpaperActivity extends Activity {
             DialWallpaperService.class,
             CasebackWallpaperService.class,
             FlipWallpaperService.class,
+            RotationWallpaperService.class,
     };
 
     @Override
@@ -24,6 +25,7 @@ public class SetWallpaperActivity extends Activity {
                 getString(R.string.app_name),
                 getString(R.string.caseback_name),
                 getString(R.string.flip_name),
+                getString(R.string.rotation_name),
         };
         new AlertDialog.Builder(this)
                 .setTitle(R.string.choose)
