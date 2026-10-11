@@ -86,6 +86,11 @@ jobs:
             adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService
             sleep 25
             adb exec-out screencap -p > preview-rotation-${{ matrix.api-level }}.png
+            adb root
+            sleep 6
+            adb wait-for-device
+            adb shell settings put global auto_time 0
+            for d in 12 13 14 15 16 17; do adb shell "date 10${d}10102026.00"; adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 14; adb exec-out screencap -p > preview-rotation-${{ matrix.api-level }}-day$d.png; done
             adb logcat -d > logcat-${{ matrix.api-level }}.txt
             grep -E "FusionDial|fusiondial|AndroidRuntime" logcat-${{ matrix.api-level }}.txt > app-log-${{ matrix.api-level }}.txt || true
 
