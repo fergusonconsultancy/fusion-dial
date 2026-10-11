@@ -74,7 +74,10 @@ jobs:
             adb shell am start -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.DialWallpaperService
             sleep 25
             adb exec-out screencap -p > preview-${{ matrix.api-level }}.png
-            adb shell am start -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.CasebackWallpaperService
+            adb shell input keyevent KEYCODE_BACK
+            adb shell input keyevent KEYCODE_HOME
+            sleep 3
+            adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.CasebackWallpaperService
             sleep 25
             adb exec-out screencap -p > preview-caseback-${{ matrix.api-level }}.png
             adb logcat -d > logcat-${{ matrix.api-level }}.txt
