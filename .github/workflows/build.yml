@@ -75,6 +75,7 @@ jobs:
             sleep 25
             adb exec-out screencap -p > preview-${{ matrix.api-level }}.png
             adb logcat -d > logcat-${{ matrix.api-level }}.txt
+            grep -E "FusionDial|fusiondial|AndroidRuntime" logcat-${{ matrix.api-level }}.txt > app-log-${{ matrix.api-level }}.txt || true
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -83,3 +84,12 @@ jobs:
           path: |
             preview-*.png
             logcat-*.txt
+
+      - name: Attach test results to the release
+        if: always()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          files: |
+            preview-*.png
+            app-log-*.txt
