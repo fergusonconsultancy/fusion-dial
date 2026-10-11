@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fusion Dial</string>
+    <string name="description">A working guilloché dial with a sweeping small seconds.</string>
+</resources>

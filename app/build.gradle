@@ -1,0 +1,43 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.fergusonconsultancy.fusiondial"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.fergusonconsultancy.fusiondial"
+        minSdk 26
+        targetSdk 35
+        // GitHub sets the run number, so every build installs over the last one.
+        versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger())
+        versionName "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+    }
+
+    // A fixed key kept in the repo, so each new build can update the previous install.
+    signingConfigs {
+        shared {
+            storeFile file("../signing/fusion-dial.jks")
+            storePassword "android"
+            keyAlias "fusiondial"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.shared
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
