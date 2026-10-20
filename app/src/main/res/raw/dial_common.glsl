@@ -101,7 +101,8 @@ vec3 backdrop(float r, float R0, float th, float phi, vec3 tint) {
 // ---------------------------------------------------------------------------
 // Extra parts for the later dials.
 uniform float uDate;      // day of the month, 1..31
-uniform sampler2D uAux;   // date-number atlas, eight numbers to a row
+uniform sampler2D uAux;   // a second texture: date atlas, or a lume mask
+uniform float uGlow;      // 0 in daylight, up to 1 when the lume is glowing in the dark
 
 float aaStep(float m) { return smoothstep(-0.8, 0.8, m); }
 
@@ -152,4 +153,11 @@ vec3 goldHand(vec2 aq, float ang, float phi) {
 vec3 coinEdge(float th, float phi, float teeth) {
     float t = 0.5 + 0.5 * cos(th * teeth);
     return silver(0.20 + 0.55 * t * (0.35 + 0.65 * pow(abs(cos(th - phi - 0.9)), 2.0)));
+}
+
+// Lume in the dark: dims the metal and paint, then adds the glowing pigment and a soft halo.
+const vec3 GLOW = vec3(0.50, 1.00, 0.66);
+vec3 lumeGlow(vec3 col, float mask, float halo) {
+    col *= mix(1.0, 0.07, uGlow);
+    return col + uGlow * GLOW * (0.95 * clamp(mask, 0.0, 1.0) + 0.45 * halo);
 }

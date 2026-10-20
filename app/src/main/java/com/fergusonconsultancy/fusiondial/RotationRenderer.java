@@ -25,7 +25,7 @@ public class RotationRenderer implements SceneRenderer {
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_petrol}, R.drawable.overlay_petrol, 0.87f),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_scales}, R.drawable.overlay_scales, 0.87f),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_neo}, R.drawable.overlay_neo, 0.92f),
-                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver2}, R.drawable.overlay_diver2, 0.74f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver2}, R.drawable.overlay_diver2, 0.74f, R.drawable.lume_diver2, true),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver3}, R.drawable.overlay_diver3, 0.76f),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_chrono}, R.drawable.overlay_chrono, 0.72f),
         };
@@ -40,8 +40,14 @@ public class RotationRenderer implements SceneRenderer {
         return (int) Math.floorMod(day, (long) dials.length);
     }
 
+    private boolean visible;
+    private int current = -1;
+
+    /** Passes visibility to today's dial, so only it listens to sensors. */
     @Override
     public void onVisible(boolean visible) {
+        this.visible = visible;
+        if (current >= 0) dials[current].onVisible(visible);
     }
 
     @Override
@@ -62,6 +68,12 @@ public class RotationRenderer implements SceneRenderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         int i = today();
+        if (i != current) {
+            // Midnight changeover: hand the sensors from yesterday's dial to today's.
+            if (current >= 0) dials[current].onVisible(false);
+            current = i;
+            if (visible) dials[i].onVisible(true);
+        }
         if (!ready[i]) {
             // Built on first use, so the phone only pays for the dial it is showing.
             dials[i].onSurfaceCreated(gl, null);

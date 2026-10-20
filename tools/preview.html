@@ -20,7 +20,7 @@ gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_PREMUL
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
 const U=n=>gl.getUniformLocation(pr,n);
-if(scene){const im2=new Image();im2.src='../app/src/main/res/drawable-nodpi/dates.png';await im2.decode();
+if(scene){const im2=new Image();im2.src='../app/src/main/res/drawable-nodpi/'+(scene==='diver2'?'lume_diver2':'dates')+'.png';await im2.decode();
  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,im2);gl.generateMipmap(gl.TEXTURE_2D);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.activeTexture(gl.TEXTURE0);}
@@ -32,7 +32,7 @@ function draw(){
   gl.viewport(0,0,W,H);gl.uniform2f(U('uRes'),W,H);gl.uniform2f(U('uCenter'),W*0.5,H*(tall?0.60:0.54));gl.uniform1f(U('uR0'),R0);
   gl.uniform1f(U('uLoop'),q.get('loop')?+q.get('loop'):(performance.now()%10000)/10000);
   gl.uniform1f(U('uHour'),(ms%43200000)/43200000*TAU);gl.uniform1f(U('uMin'),(ms%3600000)/3600000*TAU);gl.uniform1f(U('uSec'),(beat%60000)/60000*TAU);
-  gl.uniform1i(U('uOv'),0);gl.uniform1i(U('uAux'),1);gl.uniform1f(U('uDate'),+(q.get('date')||new Date().getDate()));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  gl.uniform1i(U('uOv'),0);gl.uniform1i(U('uAux'),1);gl.uniform1f(U('uGlow'),+(q.get('glow')||0));gl.uniform1f(U('uDate'),+(q.get('date')||new Date().getDate()));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   if(!q.get('time'))requestAnimationFrame(draw);else document.title='READY';
 }
 draw();

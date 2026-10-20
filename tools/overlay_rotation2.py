@@ -88,6 +88,10 @@ Image.merge('RGB', (A, A, A)).save(os.path.join(OUT, 'dates.png'), optimize=True
 # ================================================================ dual-scale diver (EXT 1.50)
 R0 = W / 2 / 1.50; s = R0 / 455.0
 L = Layer()
+LM = np.zeros((H, W), f32)                                                     # lume mask
+def lume(mask):
+    global LM
+    L.put(mask, LUME); LM = np.maximum(LM, np.clip(mask, 0, 1))
 arc, k = near(12)
 cardinal = (k % 3 == 0)
 L.put(line(r - 0.93 * R0, 1.0 * s), WHITE)
@@ -95,10 +99,10 @@ L.put(line(arc, 1.1 * s) * band(r, 0.64 * R0, 0.93 * R0), WHITE)                
 for h in range(12):
     a = h * h12
     if h % 3:
-        L.put(disc(*polar(0.60 * R0, a), 0.054 * R0), LUME)
-L.put(line(arc, 0.026 * R0, 1.0) * band(r, 0.50 * R0, 0.80 * R0) * cardinal, LUME)   # bars at 12, 3, 6, 9
+        lume(disc(*polar(0.60 * R0, a), 0.054 * R0))
+lume(line(arc, 0.026 * R0, 1.0) * band(r, 0.50 * R0, 0.80 * R0) * cardinal)   # bars at 12, 3, 6, 9
 for sx in (-1, 1):
-    L.put(disc(CX + sx * 0.115 * R0, CY - 0.775 * R0, 0.040 * R0), LUME)              # the two dots flanking 12
+    lume(disc(CX + sx * 0.115 * R0, CY - 0.775 * R0, 0.040 * R0))              # the two dots flanking 12
 # bezel: hours on the steel ring, minutes on the black ring
 INK = (18, 20, 24)
 for h in range(1, 12):
@@ -111,8 +115,10 @@ arc5, k5 = near(12)
 L.put(line(arc5, 3.0 * s) * band(r, 1.265 * R0, 1.345 * R0) * (k5 % 2 == 1), LUME)
 L.put(arc_text("MINUTES", 1.300 * R0, 30, 0.036 * R0, 600, 0.22) * 0.0, LUME)
 L.put(disc(*polar(1.305 * R0, 0), 0.046 * R0), STEEL)
-L.put(disc(*polar(1.305 * R0, 0), 0.036 * R0), LUME)
+lume(disc(*polar(1.305 * R0, 0), 0.036 * R0))
 L.save('overlay_diver2.png')
+m8 = (LM * 255).round().astype(np.uint8)
+Image.merge('RGB', [Image.fromarray(m8)] * 3).save(os.path.join(OUT, 'lume_diver2.png'), optimize=True); print('wrote lume_diver2.png')
 
 # ================================================================ taupe diver (EXT 1.50)
 L = Layer()

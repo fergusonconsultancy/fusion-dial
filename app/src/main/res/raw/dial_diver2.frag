@@ -36,6 +36,8 @@ void main() {
         }
         col *= 1.0 - 0.6 * (1.0 - smoothstep(0.0, 0.012, abs(k - 1.215))) - 0.5 * (1.0 - smoothstep(0.0, 0.010, abs(k - 1.065)));
         col = col * (1.0 - ov.a) + ov.rgb;
+        vec2 luv = p / (EXTD * R0) * 0.5 + 0.5;
+        col = lumeGlow(col, texture2D(uAux, luv).r, texture2D(uAux, luv, 4.5).r);
         gl_FragColor = vec4(col + dither, 1.0);
         return;
     }
@@ -51,14 +53,18 @@ void main() {
     vec2 aq = handAxes(p, uHour);
     float lh = 0.56 * R0;
     float wh = 0.030 * R0;
-    col = layHand(col, arrowMargin(aq, lh, wh, tail), arrowMargin(handAxes(p - sh, uHour), lh, wh, tail),
-                  steelHand(aq, uHour, phi), ECRU, 3.4 * s, step(0.50 * lh, aq.x));
+    float mH = arrowMargin(aq, lh, wh, tail);
+    float gH = step(0.50 * lh, aq.x);
+    col = layHand(col, mH, arrowMargin(handAxes(p - sh, uHour), lh, wh, tail),
+                  steelHand(aq, uHour, phi), ECRU, 3.4 * s, gH);
     // minute hand
     aq = handAxes(p, uMin);
     float lm = 0.90 * R0;
     float wm = 0.030 * R0;
-    col = layHand(col, swordMargin(aq, lm, wm, tail), swordMargin(handAxes(p - sh * 1.4, uMin), lm, wm, tail),
-                  steelHand(aq, uMin, phi), ECRU, 3.4 * s, step(0.20 * lm, aq.x) * (1.0 - step(lm - 3.4 * wm, aq.x)));
+    float mM = swordMargin(aq, lm, wm, tail);
+    float gM = step(0.20 * lm, aq.x) * (1.0 - step(lm - 3.4 * wm, aq.x));
+    col = layHand(col, mM, swordMargin(handAxes(p - sh * 1.4, uMin), lm, wm, tail),
+                  steelHand(aq, uMin, phi), ECRU, 3.4 * s, gM);
     // seconds
     float ln = 0.90 * R0;
     float tn = 0.22 * R0;
@@ -67,6 +73,15 @@ void main() {
     n = max(n, 1.0 - smoothstep(0.034 * R0 - 1.0, 0.034 * R0 + 1.0, r));
     col = mix(col, silver(0.80), n);
     col = mix(col, silver(0.25), 1.0 - smoothstep(0.010 * R0 - 1.0, 0.010 * R0 + 1.0, r));
+
+    // lume: indices from the mask (hidden where a hand covers them), plus the hands' own lume
+    vec2 luv = p / (EXTD * R0) * 0.5 + 0.5;
+    float covered = max(aaStep(mH), max(aaStep(mM), n));
+    float lumeMask = texture2D(uAux, luv).r * (1.0 - covered);
+    lumeMask = max(lumeMask, max(aaStep(mH - 3.4 * s) * gH, aaStep(mM - 3.4 * s) * gM));
+    float halo = texture2D(uAux, luv, 4.5).r * 0.9;
+    halo = max(halo, 0.45 * max(smoothstep(-14.0 * s, 0.0, mH - 3.4 * s) * gH, smoothstep(-14.0 * s, 0.0, mM - 3.4 * s) * gM));
+    col = lumeGlow(col, lumeMask, halo);
 
     gl_FragColor = vec4(col + dither, 1.0);
 }
