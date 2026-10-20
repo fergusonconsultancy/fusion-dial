@@ -14,7 +14,7 @@ void main() {
     vec3 col;
 
     if (k > 1.43) {
-        gl_FragColor = vec4(backdrop(r, R0, th, phi, vec3(0.58, 0.54, 0.48)) + dither, 1.0);
+        gl_FragColor = vec4(mix(1.0, 0.25, uGlow) * backdrop(r, R0, th, phi, vec3(0.58, 0.54, 0.48)) + dither, 1.0);
         return;
     }
     vec4 ov = texture2D(uOv, p / (EXTD * R0) * 0.5 + 0.5);
@@ -32,6 +32,8 @@ void main() {
         }
         col *= 1.0 - 0.5 * (1.0 - smoothstep(0.0, 0.010, abs(k - 1.07))) - 0.5 * (1.0 - smoothstep(0.0, 0.010, abs(k - 1.345)));
         col = col * (1.0 - ov.a) + ov.rgb;
+        vec2 luv = p / (EXTD * R0) * 0.5 + 0.5;
+        col = lumeGlow(col, texture2D(uAux, luv).r, texture2D(uAux, luv, 4.5).r, GLOW_GREEN);
         gl_FragColor = vec4(col + dither, 1.0);
         return;
     }
@@ -48,14 +50,18 @@ void main() {
     vec2 aq = handAxes(p, uHour);
     float lh = 0.58 * R0;
     float wh = 0.032 * R0;
-    col = layHand(col, snowflakeMargin(aq, lh, wh, tail), snowflakeMargin(handAxes(p - sh, uHour), lh, wh, tail),
-                  steelHand(aq, uHour, phi), white, 3.6 * s, step(0.22 * lh, aq.x));
+    float mH = snowflakeMargin(aq, lh, wh, tail);
+    float gH = step(0.22 * lh, aq.x);
+    col = layHand(col, mH, snowflakeMargin(handAxes(p - sh, uHour), lh, wh, tail),
+                  steelHand(aq, uHour, phi), white, 3.6 * s, gH);
     // minute hand
     aq = handAxes(p, uMin);
     float lm = 0.90 * R0;
     float wm = 0.034 * R0;
-    col = layHand(col, swordMargin(aq, lm, wm, tail), swordMargin(handAxes(p - sh * 1.4, uMin), lm, wm, tail),
-                  steelHand(aq, uMin, phi), white, 3.6 * s, step(0.20 * lm, aq.x) * (1.0 - step(lm - 3.4 * wm, aq.x)));
+    float mM = swordMargin(aq, lm, wm, tail);
+    float gM = step(0.20 * lm, aq.x) * (1.0 - step(lm - 3.4 * wm, aq.x));
+    col = layHand(col, mM, swordMargin(handAxes(p - sh * 1.4, uMin), lm, wm, tail),
+                  steelHand(aq, uMin, phi), white, 3.6 * s, gM);
     // seconds, with its own small snowflake
     aq = handAxes(p, uSec);
     vec2 aqs = handAxes(p - sh * 1.8, uSec);
@@ -63,9 +69,13 @@ void main() {
     float d = 0.050 * R0;
     float m = max(seg(aq, -0.24 * R0, ln, 1.5 * s), (d - (abs(aq.x - 0.60 * ln) + abs(aq.y))) * 0.7071);
     float ms = max(seg(aqs, -0.24 * R0, ln, 1.5 * s), (d - (abs(aqs.x - 0.60 * ln) + abs(aqs.y))) * 0.7071);
-    col = layHand(col, m, ms, silver(0.82), white, 3.0 * s, step(0.50 * ln, aq.x) * (1.0 - step(0.70 * ln, aq.x)));
+    float gS = step(0.50 * ln, aq.x) * (1.0 - step(0.70 * ln, aq.x));
+    col = layHand(col, m, ms, silver(0.82), white, 3.0 * s, gS);
     col = mix(col, silver(0.75), 1.0 - smoothstep(0.036 * R0 - 1.0, 0.036 * R0 + 1.0, r));
     col = mix(col, silver(0.22), 1.0 - smoothstep(0.011 * R0 - 1.0, 0.011 * R0 + 1.0, r));
+    float covered = max(aaStep(mH), max(aaStep(mM), aaStep(m)));
+    float handLume = max(max(aaStep(mH - 3.6 * s) * gH, aaStep(mM - 3.6 * s) * gM), aaStep(m - 3.0 * s) * gS);
+    col = dialLume(col, p / (EXTD * R0) * 0.5 + 0.5, covered, handLume, GLOW_GREEN);
 
     gl_FragColor = vec4(col + dither, 1.0);
 }

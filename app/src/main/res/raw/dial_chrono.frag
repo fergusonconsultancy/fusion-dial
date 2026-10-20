@@ -68,11 +68,11 @@ void main() {
         float lh = 0.50 * R0;
         float w = 0.026 * R0;
         d = layHand(d, swordMargin(aq, lh, w, tail), swordMargin(handAxes(p - sh, uHour), lh, w, tail),
-                    goldHand(aq, uHour, phi), lume, 3.4 * s, step(0.45 * lh, aq.x) * (1.0 - step(lh - 3.2 * w, aq.x)));
+                    goldHand(aq, uHour, phi), lume, 3.4 * s, 0.0);
         aq = handAxes(p, uMin);
         float lm = 0.80 * R0;
         d = layHand(d, swordMargin(aq, lm, w * 0.9, tail), swordMargin(handAxes(p - sh * 1.4, uMin), lm, w * 0.9, tail),
-                    goldHand(aq, uMin, phi), lume, 3.2 * s, step(0.55 * lm, aq.x) * (1.0 - step(lm - 3.2 * w, aq.x)));
+                    goldHand(aq, uMin, phi), lume, 3.2 * s, 0.0);
         // stopwatch seconds, resting at 12
         d *= 1.0 - 0.40 * needle(p - sh * 1.8, 0.0, 0.84 * R0, 0.20 * R0, s);
         n = needle(p, 0.0, 0.84 * R0, 0.20 * R0, s);

@@ -15,7 +15,7 @@ void main() {
     vec3 col;
 
     if (k > 1.47) {
-        gl_FragColor = vec4(backdrop(r, R0, th, phi, vec3(0.50, 0.54, 0.60)) + dither, 1.0);
+        gl_FragColor = vec4(mix(1.0, 0.25, uGlow) * backdrop(r, R0, th, phi, vec3(0.50, 0.54, 0.60)) + dither, 1.0);
         return;
     }
     vec4 ov = texture2D(uOv, p / (EXTD * R0) * 0.5 + 0.5);
@@ -37,7 +37,7 @@ void main() {
         col *= 1.0 - 0.6 * (1.0 - smoothstep(0.0, 0.012, abs(k - 1.215))) - 0.5 * (1.0 - smoothstep(0.0, 0.010, abs(k - 1.065)));
         col = col * (1.0 - ov.a) + ov.rgb;
         vec2 luv = p / (EXTD * R0) * 0.5 + 0.5;
-        col = lumeGlow(col, texture2D(uAux, luv).r, texture2D(uAux, luv, 4.5).r);
+        col = lumeGlow(col, texture2D(uAux, luv).r, texture2D(uAux, luv, 4.5).r, GLOW_GREEN);
         gl_FragColor = vec4(col + dither, 1.0);
         return;
     }
@@ -81,7 +81,7 @@ void main() {
     lumeMask = max(lumeMask, max(aaStep(mH - 3.4 * s) * gH, aaStep(mM - 3.4 * s) * gM));
     float halo = texture2D(uAux, luv, 4.5).r * 0.9;
     halo = max(halo, 0.45 * max(smoothstep(-14.0 * s, 0.0, mH - 3.4 * s) * gH, smoothstep(-14.0 * s, 0.0, mM - 3.4 * s) * gM));
-    col = lumeGlow(col, lumeMask, halo);
+    col = lumeGlow(col, lumeMask, halo, GLOW_GREEN);
 
     gl_FragColor = vec4(col + dither, 1.0);
 }

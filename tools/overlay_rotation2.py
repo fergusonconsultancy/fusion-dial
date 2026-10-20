@@ -125,8 +125,10 @@ L = Layer()
 arc60, k60 = near(60)
 L.put(line(arc60, np.where(k60 % 5 == 0, 1.9, 1.1) * s) * band(r, 0.935 * R0, 0.985 * R0), WHITE)
 arc, k = near(12)
+LM3 = np.zeros((H, W), f32)
 def applied(mask_outer, mask_inner):
-    L.put(mask_outer, STEEL); L.put(mask_inner, WHITE)
+    global LM3
+    L.put(mask_outer, STEEL); L.put(mask_inner, WHITE); LM3 = np.maximum(LM3, np.clip(mask_inner, 0, 1))
 for h in range(12):
     if h % 3:
         c = polar(0.745 * R0, h * h12)
@@ -147,8 +149,11 @@ first15 = (k60 >= 1) & (k60 <= 14) & (k60 % 5 != 0)
 L.put(line(arc60, 1.7 * s) * band(r, 1.215 * R0, 1.300 * R0) * first15, SIL)
 tb = (-(dy) - 1.115 * R0) / (1.295 * R0 - 1.115 * R0)
 L.put(np.clip(np.minimum(np.minimum(tb, 1 - tb) * 0.18 * R0, 0.105 * R0 * tb - np.abs(dx)) + 0.5, 0, 1) * (tb > 0), SIL)
-L.put(disc(*polar(1.235 * R0, 0), 0.034 * R0), WHITE)
+m_pip = disc(*polar(1.235 * R0, 0), 0.034 * R0)
+L.put(m_pip, WHITE)
 L.save('overlay_diver3.png')
+m8 = (np.maximum(LM3, m_pip) * 255).round().astype(np.uint8)
+Image.merge('RGB', [Image.fromarray(m8)] * 3).save(os.path.join(OUT, 'lume_diver3.png'), optimize=True); print('wrote lume_diver3.png')
 
 # ================================================================ gold chronograph (EXT 1.18)
 R0 = W / 2 / 1.18; s = R0 / 455.0
@@ -167,7 +172,7 @@ L.put(line(arc60, np.where(k60 % 5 == 0, 1.6, 0.9) * s) * band(r, np.where(k60 %
 arc, k = near(12)
 has = (k != 9) & (k != 6)
 L.put(line(arc, 0.024 * R0, 1.0) * band(r, 0.555 * R0, 0.755 * R0) * has * (k != 0), GOLD)
-L.put(line(arc, 0.010 * R0, 1.0) * band(r, 0.66 * R0, 0.745 * R0) * has * (k != 0), (250, 246, 228))
+L.put(line(arc, 0.010 * R0, 1.0) * band(r, 0.66 * R0, 0.745 * R0) * has * (k != 0), (255, 238, 176))
 for sx in (-1, 1):                                                                    # double marker at 12
     m = (np.abs(dx - sx * 0.030 * R0) < 0.020 * R0) & (-dy > 0.555 * R0) & (-dy < 0.755 * R0)
     L.put(m.astype(f32), GOLD)

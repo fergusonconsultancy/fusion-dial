@@ -156,8 +156,16 @@ vec3 coinEdge(float th, float phi, float teeth) {
 }
 
 // Lume in the dark: dims the metal and paint, then adds the glowing pigment and a soft halo.
-const vec3 GLOW = vec3(0.50, 1.00, 0.66);
-vec3 lumeGlow(vec3 col, float mask, float halo) {
+// Glow colours, matched to night photos of each watch.
+const vec3 GLOW_GREEN = vec3(0.50, 1.00, 0.66);
+const vec3 GLOW_AQUA = vec3(0.38, 0.95, 1.00);
+vec3 lumeGlow(vec3 col, float mask, float halo, vec3 glow) {
     col *= mix(1.0, 0.07, uGlow);
-    return col + uGlow * GLOW * (0.95 * clamp(mask, 0.0, 1.0) + 0.45 * halo);
+    return col + uGlow * glow * (0.95 * clamp(mask, 0.0, 1.0) + 0.45 * halo);
+}
+// The common case: a lume mask texture plus hand lume.
+vec3 dialLume(vec3 col, vec2 luv, float covered, float handLume, vec3 glow) {
+    float mask = max(texture2D(uAux, luv).r * (1.0 - covered), handLume);
+    float halo = max(texture2D(uAux, luv, 4.5).r * 0.9, 0.45 * handLume);
+    return lumeGlow(col, mask, halo, glow);
 }

@@ -14,7 +14,7 @@ void main() {
     vec3 col;
 
     if (r > R0 * 1.15) {
-        gl_FragColor = vec4(backdrop(r, R0, th, phi, vec3(0.10, 0.55, 0.62)) + dither, 1.0);
+        gl_FragColor = vec4(mix(1.0, 0.25, uGlow) * backdrop(r, R0, th, phi, vec3(0.10, 0.55, 0.62)) + dither, 1.0);
         return;
     }
     if (r > R0) {
@@ -22,6 +22,7 @@ void main() {
         float k = (r - R0) / (0.13 * R0);
         col = caseSteel(th, phi, 0.16 + 0.30 * sin(k * PI));
         col *= smoothstep(0.0, 0.06, k) * (1.0 - smoothstep(0.94, 1.12, k));
+        col *= mix(1.0, 0.07, uGlow);
         gl_FragColor = vec4(col + dither, 1.0);
         return;
     }
@@ -74,6 +75,9 @@ void main() {
         float cap = 1.0 - smoothstep(0.042 * R0 - 1.0, 0.042 * R0 + 1.0, r);
         col = mix(col, silver(0.40 + 0.60 * pow(abs(cos(th - 0.7 - phi)), 2.0)), cap);
         col = mix(col, silver(0.18), 1.0 - smoothstep(0.012 * R0 - 1.0, 0.012 * R0 + 1.0, r));
+        col = dialLume(col, uv, max(hh.x, mm.x), max(hh.y, mm.y), GLOW_AQUA);
+    } else {
+        col = dialLume(col, uv, 0.0, 0.0, GLOW_AQUA);
     }
     gl_FragColor = vec4(col + dither, 1.0);
 }

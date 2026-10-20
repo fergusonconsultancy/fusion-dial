@@ -22,12 +22,14 @@ public class RotationRenderer implements SceneRenderer {
 
     public RotationRenderer(Context context) {
         dials = new DialRenderer[]{
-                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_petrol}, R.drawable.overlay_petrol, 0.87f),
-                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_scales}, R.drawable.overlay_scales, 0.87f),
+                // shader, furniture texture, size, then (for lume dials) the lume mask
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_petrol}, R.drawable.overlay_petrol, 0.87f, R.drawable.lume_petrol, true),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_scales}, R.drawable.overlay_scales, 0.87f, R.drawable.lume_scales, true),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_neo}, R.drawable.overlay_neo, 0.92f),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver2}, R.drawable.overlay_diver2, 0.74f, R.drawable.lume_diver2, true),
-                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver3}, R.drawable.overlay_diver3, 0.76f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver3}, R.drawable.overlay_diver3, 0.76f, R.drawable.lume_diver3, true),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_chrono}, R.drawable.overlay_chrono, 0.72f),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_underdog}, R.drawable.overlay_underdog, 0.88f, R.drawable.dates, true),
         };
         ready = new boolean[dials.length];
     }

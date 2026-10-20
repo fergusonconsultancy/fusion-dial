@@ -65,6 +65,12 @@ def arc_text(text, radius, centre_deg, size, weight=520, spacing=0.14, inward=Fa
     return np.asarray(layer, f32) / 255
 
 CREAM = (244, 243, 232)
+
+def save_mask(mask, name):
+    """Lume mask: white where the paint glows in the dark."""
+    m8 = (np.clip(mask, 0, 1) * 255).round().astype(np.uint8)
+    out = os.path.join(HERE, '..', 'app', 'src', 'main', 'res', 'drawable-nodpi', name)
+    Image.merge('RGB', [Image.fromarray(m8)] * 3).save(out, optimize=True); print('wrote', name)
 polish = 0.50 + 0.50 * np.abs(np.cos(th - 0.7)) ** 3
 
 # ------------------------------------------------------------------ petrol sports dial
@@ -80,9 +86,11 @@ fs = font(0.050 * R0, 520)
 L.put(text_mask([("%02d" % (m if m else 60), *polar(0.925 * R0, m / 60 * TAU), fs) for m in range(0, 60, 5)]) * 0.92, CREAM)
 # hour furniture: numerals at 12, 2, 4, 8, 10 and batons at the odd hours
 k = np.round(ang / h12); arc = np.abs(ang - k * h12) * r
-L.put((1 - sstep(7.5 * s - 1, 7.5 * s + 1, arc)) * band(r, 0.60 * R0, 0.80 * R0) * (k % 2 == 1) * outside_sub, CREAM)
+m_bat = (1 - sstep(7.5 * s - 1, 7.5 * s + 1, arc)) * band(r, 0.60 * R0, 0.80 * R0) * (k % 2 == 1) * outside_sub
+L.put(m_bat, CREAM)
 fn = font(0.215 * R0, 540)
-L.put(text_mask([(str(h), *polar(0.70 * R0, h * h12), fn) for h in (12, 2, 4, 8, 10)]), CREAM)
+m_num = text_mask([(str(h), *polar(0.70 * R0, h * h12), fn) for h in (12, 2, 4, 8, 10)])
+L.put(m_num, CREAM)
 # small seconds: bevel, ticks, 20 / 40 / 60
 L.put(1 - sstep(2.0 * s - 1, 2.0 * s + 1, np.abs(rs - Rs)), silver(0.30 + 0.5 * polish) * np.array([0.55, 0.95, 0.90], f32))
 for div, wd, lo in ((60, 0.9, 0.86), (12, 1.6, 0.80)):
@@ -92,6 +100,7 @@ ft = font(0.043 * R0, 520)
 L.put(text_mask([(t, *polar(0.60 * Rs, a, (SCX, SCY)), ft) for t, a in (("60", 0), ("20", TAU / 3), ("40", 2 * TAU / 3))]) * 0.92, CREAM)
 L.put(arc_text("MADE IN GERMANY", 0.985 * R0 - 0.002 * R0, 180, 0.022 * R0, inward=True) * 0.0, CREAM)
 L.save('overlay_petrol.png')
+save_mask(np.maximum(m_bat, m_num), 'lume_petrol.png')
 
 # ------------------------------------------------------------------ scale-guilloche dial
 L = Layer()
@@ -111,9 +120,11 @@ for oy in range(SS):
         fret += KEY[row, col] * ok
 k = np.round(ang / h12); arc = np.abs(ang - k * h12) * r
 gap = sstep(11 * s, 15 * s, arc)                                               # frets stop short of each marker
-L.put(fret / (SS * SS) * gap, (236, 240, 242))
+m_fret = fret / (SS * SS) * gap
+L.put(m_fret, (236, 240, 242))
 for rad_, wid in ((F_IN, 1.5), (F_OUT, 1.5)):
-    L.put((1 - sstep(wid * s - .8, wid * s + .8, np.abs(r - rad_))) * gap, (236, 240, 242))
+    m_rail = (1 - sstep(wid * s - .8, wid * s + .8, np.abs(r - rad_))) * gap
+    L.put(m_rail, (236, 240, 242)); m_fret = np.maximum(m_fret, m_rail)
 L.put((1 - sstep(1.6 * s - .8, 1.6 * s + .8, arc)) * band(r, 0.955 * R0, 0.99 * R0), (236, 240, 242))   # outer hour ticks
 # applied hour markers: long, dark-polished, with a bright facet
 mk = (1 - sstep(6.5 * s - 1, 6.5 * s + 1, arc)) * band(r, 0.67 * R0, 0.945 * R0)
@@ -121,3 +132,4 @@ side = np.sign(np.sin(ang - k * h12) + 1e-9)
 facet = np.where(side > 0, 0.20, 0.62) + 0.25 * polish
 L.put(mk, silver(facet) * np.array([0.80, 0.88, 1.0], f32))
 L.save('overlay_scales.png')
+save_mask(m_fret, 'lume_scales.png')
