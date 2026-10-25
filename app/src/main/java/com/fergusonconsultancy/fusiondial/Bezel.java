@@ -90,6 +90,7 @@ final class Bezel {
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 float k = (float) Math.hypot(x - cx, y - cy) / r0;
+                android.util.Log.d("FusionDial", "bezel touch at radius " + k + (k < hitInner || k > hitOuter ? " (missed)" : " (grabbed)"));
                 if (k < hitInner || k > hitOuter) return false;
                 dragging = true;
                 moved = false;
@@ -116,7 +117,10 @@ final class Bezel {
                     angle = norm(angle - step);
                     passed++;
                 }
-                if (passed > 0) detent();
+                if (passed > 0) {
+                    detent();
+                    android.util.Log.d("FusionDial", "bezel turned " + passed + " detent(s), now at " + norm(angle));
+                }
                 return true;
             }
             case MotionEvent.ACTION_UP:

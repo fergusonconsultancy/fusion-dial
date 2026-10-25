@@ -94,11 +94,16 @@ jobs:
             # Bezel test: the Tudor is the 12 Oct dial. Swipe right to left across the top of its bezel (anticlockwise).
             adb shell "date 101210102026.00"; adb shell input keyevent KEYCODE_HOME; sleep 2
             adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 12
-            SIZE=$(adb shell wm size | tail -1 | sed 's/.*: //'); W=${SIZE%x*}; H=${SIZE#*x}
+            adb shell wm size
+            SIZE=$(adb shell wm size | grep -i physical | sed 's/.*: //' | tr -d '\r'); W=${SIZE%x*}; H=${SIZE#*x}
+            echo "screen $W x $H"
             R=$(( W * 421 * 76 / 100000 )); CY=$(( H * 60 / 100 )); YT=$(( CY - R * 125 / 100 ))
             adb shell input swipe $(( W / 2 + R * 55 / 100 )) $(( YT + R * 12 / 100 )) $(( W / 2 - R * 55 / 100 )) $(( YT + R * 12 / 100 )) 900
+            echo "swiped at y=$(( YT + R * 12 / 100 )), dial radius $R, centre y $CY"
             sleep 2
             adb exec-out screencap -p > preview-bezel-${{ matrix.api-level }}.png
+            adb logcat -d | grep -E "FusionDial|ViewRootImpl.*Wallpaper|WallpaperService" > bezel-log-${{ matrix.api-level }}.txt || true
+            adb shell wm size >> bezel-log-${{ matrix.api-level }}.txt
             adb logcat -d > logcat-${{ matrix.api-level }}.txt
             grep -E "FusionDial|fusiondial|AndroidRuntime" logcat-${{ matrix.api-level }}.txt > app-log-${{ matrix.api-level }}.txt || true
 
@@ -118,3 +123,4 @@ jobs:
           files: |
             preview-*.png
             app-log-*.txt
+            bezel-log-*.txt
