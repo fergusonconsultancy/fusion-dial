@@ -91,15 +91,25 @@ jobs:
             adb wait-for-device
             adb shell settings put global auto_time 0
             for d in 12 13 14 15 16 17 18; do adb shell "date 10${d}10102026.00"; adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 14; adb exec-out screencap -p > preview-rotation-${{ matrix.api-level }}-day$d.png; done
-            # Bezel test: the Tudor is the 12 Oct dial. Swipe right to left across the top of its bezel (anticlockwise).
+            # Bezel test on the real home screen. The Tudor is the 12 Oct dial.
             adb shell "date 101210102026.00"; adb shell input keyevent KEYCODE_HOME; sleep 2
-            adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 12
-            adb shell wm size
+            adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 10
+            tapText() {
+              adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+              B=$(adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep -i "text=\"$1" | head -1 | sed -E 's/.*bounds="\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]".*/\1 \2 \3 \4/')
+              echo "found '$1' at: $B"
+              set -- $B
+              [ -n "$4" ] && adb shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 ))
+            }
+            tapText "Set wallpaper"; sleep 3
+            tapText "Home screen" || true; sleep 3
+            adb shell input keyevent KEYCODE_HOME; sleep 4
+            adb exec-out screencap -p > home-before-${{ matrix.api-level }}.png
             SIZE=$(adb shell wm size | grep -i physical | sed 's/.*: //' | tr -d '\r'); W=${SIZE%x*}; H=${SIZE#*x}
-            echo "screen $W x $H"
             R=$(( W * 421 * 76 / 100000 )); CY=$(( H * 60 / 100 )); YT=$(( CY - R * 125 / 100 ))
-            adb shell input swipe $(( W / 2 + R * 55 / 100 )) $(( YT + R * 12 / 100 )) $(( W / 2 - R * 55 / 100 )) $(( YT + R * 12 / 100 )) 900
-            echo "swiped at y=$(( YT + R * 12 / 100 )), dial radius $R, centre y $CY"
+            Y=$(( YT + R * 12 / 100 ))
+            echo "screen $W x $H, dial radius $R, centre y $CY, swipe at y $Y"
+            adb shell input swipe $(( W / 2 + R * 55 / 100 )) $Y $(( W / 2 - R * 55 / 100 )) $Y 900
             sleep 2
             adb exec-out screencap -p > preview-bezel-${{ matrix.api-level }}.png
             adb logcat -d | grep -E "FusionDial|ViewRootImpl.*Wallpaper|WallpaperService" > bezel-log-${{ matrix.api-level }}.txt || true
@@ -124,3 +134,4 @@ jobs:
             preview-*.png
             app-log-*.txt
             bezel-log-*.txt
+            home-before-*.png

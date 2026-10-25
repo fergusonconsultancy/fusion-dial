@@ -67,6 +67,9 @@ public abstract class GLWallpaperService extends WallpaperService {
 
         @Override
         public void onTouchEvent(android.view.MotionEvent event) {
+            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
+                android.util.Log.d("FusionDial", "wallpaper touch down at " + event.getX() + "," + event.getY());
+            }
             if (renderer != null) renderer.onTouch(event);
             super.onTouchEvent(event);
         }
