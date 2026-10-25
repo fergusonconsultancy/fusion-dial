@@ -91,6 +91,14 @@ jobs:
             adb wait-for-device
             adb shell settings put global auto_time 0
             for d in 12 13 14 15 16 17 18; do adb shell "date 10${d}10102026.00"; adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 14; adb exec-out screencap -p > preview-rotation-${{ matrix.api-level }}-day$d.png; done
+            # Bezel test: the Tudor is the 12 Oct dial. Swipe right to left across the top of its bezel (anticlockwise).
+            adb shell "date 101210102026.00"; adb shell input keyevent KEYCODE_HOME; sleep 2
+            adb shell am start -f 0x10008000 -a android.service.wallpaper.CHANGE_LIVE_WALLPAPER --ecn android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT com.fergusonconsultancy.fusiondial/.RotationWallpaperService; sleep 12
+            SIZE=$(adb shell wm size | tail -1 | sed 's/.*: //'); W=${SIZE%x*}; H=${SIZE#*x}
+            R=$(( W * 421 * 76 / 100000 )); CY=$(( H * 60 / 100 )); YT=$(( CY - R * 125 / 100 ))
+            adb shell input swipe $(( W / 2 + R * 55 / 100 )) $(( YT + R * 12 / 100 )) $(( W / 2 - R * 55 / 100 )) $(( YT + R * 12 / 100 )) 900
+            sleep 2
+            adb exec-out screencap -p > preview-bezel-${{ matrix.api-level }}.png
             adb logcat -d > logcat-${{ matrix.api-level }}.txt
             grep -E "FusionDial|fusiondial|AndroidRuntime" logcat-${{ matrix.api-level }}.txt > app-log-${{ matrix.api-level }}.txt || true
 

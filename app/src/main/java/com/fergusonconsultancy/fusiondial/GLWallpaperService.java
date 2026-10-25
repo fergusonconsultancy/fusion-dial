@@ -43,7 +43,7 @@ public abstract class GLWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            setTouchEventsEnabled(false);
+            setTouchEventsEnabled(true);   // for the turnable bezels
             renderer = createRenderer();
             view = new WallpaperGLView(GLWallpaperService.this);
             view.setEGLContextClientVersion(2);
@@ -63,6 +63,12 @@ public abstract class GLWallpaperService extends WallpaperService {
                 view.onPause();
             }
             if (renderer != null) renderer.onVisible(visible);
+        }
+
+        @Override
+        public void onTouchEvent(android.view.MotionEvent event) {
+            if (renderer != null) renderer.onTouch(event);
+            super.onTouchEvent(event);
         }
 
         @Override

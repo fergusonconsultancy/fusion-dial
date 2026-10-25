@@ -39,7 +39,8 @@ public class DialRenderer implements SceneRenderer, SensorEventListener {
     private int program;
     private int texture;
     private int width = 1, height = 1;
-    private int uRes, uCenter, uR0, uLoop, uHour, uMin, uSec, uOv, uDate, uAux, uGlow;
+    private int uRes, uCenter, uR0, uLoop, uHour, uMin, uSec, uOv, uDate, uAux, uGlow, uBezel;
+    private Bezel bezel;
     private int auxTexture;
     private long lastFrame;
 
@@ -82,6 +83,20 @@ public class DialRenderer implements SceneRenderer, SensorEventListener {
         this.hasLume = hasLume;
         sensors = hasLume ? (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE) : null;
         lightSensor = sensors != null ? sensors.getDefaultSensor(Sensor.TYPE_LIGHT) : null;
+    }
+
+    /**
+     * Makes this dial's bezel turnable. clicks: detents per turn. inner, outer: the ring in dial radii.
+     * clickStrength: 0 to 1. key: where its position is saved.
+     */
+    public DialRenderer withBezel(int clicks, float inner, float outer, float clickStrength, String key) {
+        bezel = new Bezel(context, clicks, inner, outer, clickStrength, key);
+        return this;
+    }
+
+    @Override
+    public void onTouch(android.view.MotionEvent event) {
+        if (bezel != null) bezel.onTouch(event);
     }
 
     /** Only listen to the light sensor while this dial is on screen. */
@@ -142,6 +157,7 @@ public class DialRenderer implements SceneRenderer, SensorEventListener {
         uDate = GLES20.glGetUniformLocation(program, "uDate");
         uAux = GLES20.glGetUniformLocation(program, "uAux");
         uGlow = GLES20.glGetUniformLocation(program, "uGlow");
+        uBezel = GLES20.glGetUniformLocation(program, "uBezel");
         texture = GlUtil.loadTexture(context, overlayId);
         // Only dials that sample a second texture (date atlas or lume mask) load one.
         auxTexture = uAux >= 0 ? GlUtil.loadTexture(context, auxId) : 0;
@@ -206,6 +222,10 @@ public class DialRenderer implements SceneRenderer, SensorEventListener {
         }
         if (uDate >= 0) {
             GLES20.glUniform1f(uDate, java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH));
+        }
+        if (bezel != null) {
+            bezel.setGeometry(cx, cy, r0, min);
+            if (uBezel >= 0) GLES20.glUniform1f(uBezel, bezel.update());
         }
         if (uGlow >= 0) {
             GLES20.glUniform1f(uGlow, hasLume ? lumeGlow(msOfDay) : 0f);

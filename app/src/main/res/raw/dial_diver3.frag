@@ -22,6 +22,7 @@ void main() {
     float brush = 0.10 * ring(th + PI, 900.0);
 
     if (k > 1.0) {
+        ov = texture2D(uOv, bezelFrame(p) / (EXTD * R0) * 0.5 + 0.5);   // the bezel's printing turns with it
         if (k > 1.345) {
             col = coinEdge(th, phi, 170.0) * (1.0 - smoothstep(1.405, 1.43, k));
         } else if (k > 1.07) {
@@ -32,7 +33,7 @@ void main() {
         }
         col *= 1.0 - 0.5 * (1.0 - smoothstep(0.0, 0.010, abs(k - 1.07))) - 0.5 * (1.0 - smoothstep(0.0, 0.010, abs(k - 1.345)));
         col = col * (1.0 - ov.a) + ov.rgb;
-        vec2 luv = p / (EXTD * R0) * 0.5 + 0.5;
+        vec2 luv = bezelFrame(p) / (EXTD * R0) * 0.5 + 0.5;
         col = lumeGlow(col, texture2D(uAux, luv).r, texture2D(uAux, luv, 4.5).r, GLOW_GREEN);
         gl_FragColor = vec4(col + dither, 1.0);
         return;

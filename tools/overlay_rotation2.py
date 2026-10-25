@@ -113,6 +113,8 @@ for mnt in (10, 20, 30, 40, 50):
     L.put(arc_text(str(mnt), 1.305 * R0, mnt * 6, 0.108 * R0, 560), LUME)
 arc5, k5 = near(12)
 L.put(line(arc5, 3.0 * s) * band(r, 1.265 * R0, 1.345 * R0) * (k5 % 2 == 1), LUME)
+arc60, k60 = near(60)                                                             # per-minute marks over the last 15 minutes
+L.put(line(arc60, 1.5 * s) * band(r, 1.270 * R0, 1.335 * R0) * ((k60 > 45) & (k60 % 5 != 0)), LUME)
 L.put(arc_text("MINUTES", 1.300 * R0, 30, 0.036 * R0, 600, 0.22) * 0.0, LUME)
 L.put(disc(*polar(1.305 * R0, 0), 0.046 * R0), STEEL)
 lume(disc(*polar(1.305 * R0, 0), 0.036 * R0))

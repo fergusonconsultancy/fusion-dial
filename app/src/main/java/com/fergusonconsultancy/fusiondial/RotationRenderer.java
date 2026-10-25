@@ -26,8 +26,10 @@ public class RotationRenderer implements SceneRenderer {
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_petrol}, R.drawable.overlay_petrol, 0.87f, R.drawable.lume_petrol, true),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_scales}, R.drawable.overlay_scales, 0.87f, R.drawable.lume_scales, true),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_neo}, R.drawable.overlay_neo, 0.92f),
-                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver2}, R.drawable.overlay_diver2, 0.74f, R.drawable.lume_diver2, true),
-                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver3}, R.drawable.overlay_diver3, 0.76f, R.drawable.lume_diver3, true),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver2}, R.drawable.overlay_diver2, 0.74f, R.drawable.lume_diver2, true)
+                        .withBezel(120, 1.065f, 1.47f, 0.55f, "serica"),
+                new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_diver3}, R.drawable.overlay_diver3, 0.76f, R.drawable.lume_diver3, true)
+                        .withBezel(60, 1.07f, 1.43f, 0.80f, "tudor"),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_chrono}, R.drawable.overlay_chrono, 0.72f),
                 new DialRenderer(context, new int[]{R.raw.dial_common, R.raw.dial_underdog}, R.drawable.overlay_underdog, 0.88f, R.drawable.dates, true),
         };
@@ -44,6 +46,12 @@ public class RotationRenderer implements SceneRenderer {
 
     private boolean visible;
     private int current = -1;
+
+    @Override
+    public void onTouch(android.view.MotionEvent event) {
+        int i = current;
+        if (i >= 0) dials[i].onTouch(event);
+    }
 
     /** Passes visibility to today's dial, so only it listens to sensors. */
     @Override

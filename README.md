@@ -16,6 +16,8 @@ Three Android live wallpapers in one app.
 
 **Rotation**: a different dial from the collection each day, changing at midnight, each with working hands. Seven dials: petrol sunburst sports dial, scale guilloché, black single-hand with a live date, dual-scale diver, taupe diver with snowflake hands, gold cushion chronograph, and a fully lumed white field dial.
 
+The two divers have turnable bezels. Drag round the bezel on the home screen: like the real thing it only turns anticlockwise, clicks through each detent (120 on the dual-scale diver, 60 on the taupe diver) with a haptic click, and gives a little if pushed clockwise. Set the pip over the minute hand and read elapsed minutes off the bezel. Double-tap the bezel to ratchet the pip round to the minute hand. Each bezel remembers where it was left.
+
 Dials with lume glow when the room goes dark (read from the light sensor), in each watch's own colour: aqua on the petrol, scale and field dials, green on the two divers. The glow fades over 15 minutes and recharges in the light.
 
 Drawing and sensing stop whenever the wallpaper is hidden.

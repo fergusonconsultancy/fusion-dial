@@ -150,9 +150,17 @@ vec3 goldHand(vec2 aq, float ang, float phi) {
 }
 
 // Knurled grip ring round a rotating bezel.
+uniform float uBezel;     // turnable bezel position, radians clockwise from 12
+
+// Knurled grip ring round a rotating bezel. The teeth turn with the bezel; the light stays put.
 vec3 coinEdge(float th, float phi, float teeth) {
-    float t = 0.5 + 0.5 * cos(th * teeth);
+    float t = 0.5 + 0.5 * cos((th - uBezel) * teeth);
     return silver(0.20 + 0.55 * t * (0.35 + 0.65 * pow(abs(cos(th - phi - 0.9)), 2.0)));
+}
+// A point in the bezel's own frame, for sampling its printing.
+vec2 bezelFrame(vec2 p) {
+    float c = cos(-uBezel), s = sin(-uBezel);
+    return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
 }
 
 // Lume in the dark: dims the metal and paint, then adds the glowing pigment and a soft halo.

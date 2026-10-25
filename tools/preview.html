@@ -32,7 +32,7 @@ function draw(){
   gl.viewport(0,0,W,H);gl.uniform2f(U('uRes'),W,H);gl.uniform2f(U('uCenter'),W*0.5,H*(tall?0.60:0.54));gl.uniform1f(U('uR0'),R0);
   gl.uniform1f(U('uLoop'),q.get('loop')?+q.get('loop'):(performance.now()%10000)/10000);
   gl.uniform1f(U('uHour'),(ms%43200000)/43200000*TAU);gl.uniform1f(U('uMin'),(ms%3600000)/3600000*TAU);gl.uniform1f(U('uSec'),(beat%60000)/60000*TAU);
-  gl.uniform1i(U('uOv'),0);gl.uniform1i(U('uAux'),1);gl.uniform1f(U('uGlow'),+(q.get('glow')||0));gl.uniform1f(U('uDate'),+(q.get('date')||new Date().getDate()));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  gl.uniform1i(U('uOv'),0);gl.uniform1i(U('uAux'),1);gl.uniform1f(U('uBezel'),+(q.get('bezel')||0));gl.uniform1f(U('uGlow'),+(q.get('glow')||0));gl.uniform1f(U('uDate'),+(q.get('date')||new Date().getDate()));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   if(!q.get('time'))requestAnimationFrame(draw);else document.title='READY';
 }
 draw();
